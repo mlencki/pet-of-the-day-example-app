@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+
+  app:
+    build:
+      context: .
+    container_name: pet-of-the-day-app
+    volumes:
+      - .:/var/www/html/
+    networks:
+      - pet-of-the-day-dev
+    ports:
+      - "8080:8080"
+
+  database:
+    image: mysql:8.0
+    container_name: potddb-dev
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - pet-of-the-day-mysql-data:/var/lib/mysql
+    networks:
+      - pet-of-the-day-dev
+
+  database-test:
+    image: mysql:8.0
+    container_name: potddb-test
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+      - MYSQL_DATABASE=potddb
+      - MYSQL_USER=testuser123
+      - MYSQL_PASSWORD=test123
+    ports:
+      - "3307:3306"
+    networks:
+      - pet-of-the-day-dev
+
+  node:
+    image: node:17.2.0-alpine3.14
+    container_name: pet-of-the-day-node
+    working_dir: /var/www/html/
+    volumes:
+      - .:/var/www/html/
+    networks:
+      - pet-of-the-day-dev
+
+networks:
+  pet-of-the-day-dev:
+    driver: bridge
+
+volumes:
+  pet-of-the-day-mysql-data:
+    name: pet-of-the-day-management-server-mysql-data
